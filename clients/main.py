@@ -1,3 +1,5 @@
+import time
+import argparse
 from typing import Dict, List
 
 import cv2
@@ -108,8 +110,6 @@ class YOLOv8nFace:
 
 
 if __name__ == '__main__':
-    import time
-    import argparse
     tic = time.perf_counter()
 
     parser = argparse.ArgumentParser()
@@ -128,6 +128,8 @@ if __name__ == '__main__':
 
     # Perform detection
     boxes, scores = YOLOv8_Face_detector.detect(source_image)
+
+    print("Inference time: ", time.perf_counter() - tic)
 
     result_image = YOLOv8_Face_detector.draw_detections(source_image, boxes, scores)
 
