@@ -28,7 +28,7 @@ int main()
 
     cv::imwrite("output.jpeg", image);
 
-    std::cout << "Frame processing time: " << util::duration(start_time) << std::endl;
+    std::cout << "Total processing time: " << util::duration(start_time) << std::endl;
 
     return 0;
 }

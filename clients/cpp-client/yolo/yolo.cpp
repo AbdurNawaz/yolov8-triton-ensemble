@@ -49,9 +49,6 @@ std::tuple<int, int, float, float> YoloClient::preprocess(const cv::Mat &frame, 
 
     this->resize(frameCopy, newHeight, newWidth, padH, padW);
 
-    std::cout << "newHeight = " << newHeight << " newWidth = " << newWidth << std::endl;
-    std::cout << "rows = " << frame.rows << " cols = " << frame.cols << std::endl;
-
     float scaleH = static_cast<float>(frame.rows) / static_cast<float>(newHeight);
     float scaleW = static_cast<float>(frame.cols) / static_cast<float>(newWidth);
 
@@ -60,8 +57,6 @@ std::tuple<int, int, float, float> YoloClient::preprocess(const cv::Mat &frame, 
     // allocate the flattened array
     const size_t imageSize = frameCopy.total() * frameCopy.elemSize();
     inputData.resize(imageSize);
-
-    std::cout << "frame.total() = " << frameCopy.total() << ", frame.elemSize() =  " << frameCopy.elemSize() << std::endl;
 
     std::vector<cv::Mat> imageRGBChannels;
     size_t pos = 0;
@@ -91,28 +86,10 @@ std::vector<cv::Rect> YoloClient::detect(cv::Mat &frame)
 
     std::vector<uint8_t> inputData;
     const auto [padH, padW, scaleH, scaleW] = this->preprocess(frame, inputData);
-    std::cout << "Split: " << util::duration(start_time) << std::endl;
 
     tc::InferResult *result = this->triton_->infer(inputData);
 
     auto [detectionBBoxes, detectionScores] = parseTritonOuput(result);
-
-    std::cout << "Scores: " << std::endl;
-    for (const float score : detectionScores)
-    {
-        std::cout << score << " ";
-    }
-    std::cout << std::endl
-              << "Boxes: " << std::endl;
-    ;
-    for (const std::vector<float> &box : detectionBBoxes)
-    {
-        for (const float val : box)
-        {
-            std::cout << val << " ";
-        }
-        std::cout << std::endl;
-    }
 
     std::vector<cv::Rect> boxes = postProcess(detectionBBoxes, padH, padW, scaleH, scaleW);
 
@@ -121,7 +98,6 @@ std::vector<cv::Rect> YoloClient::detect(cv::Mat &frame)
 
 std::tuple<std::vector<std::vector<float>>, std::vector<float>> YoloClient::parseTritonOuput(tc::InferResult *tritonResult)
 {
-    auto start_time = std::chrono::high_resolution_clock::now();
     // parse detection_bboxes
     std::vector<float> detectionBboxes;
     Triton::parseFloatArrayFromResult(tritonResult, "detection_bboxes", detectionBboxes);
@@ -134,13 +110,9 @@ std::tuple<std::vector<std::vector<float>>, std::vector<float>> YoloClient::pars
         bboxes.emplace_back(detectionBboxes.begin() + i, detectionBboxes.begin() + i + 4);
     }
 
-    std::cout << "BBoxes size: " << bboxes.size() << std::endl;
-
     // parse detection_scores
     std::vector<float> detectionScores;
     Triton::parseFloatArrayFromResult(tritonResult, "detection_scores", detectionScores);
-
-    std::cout << "parseTritonOutput: " << util::duration(start_time) << std::endl;
 
     return std::make_tuple(bboxes, detectionScores);
 }
@@ -150,9 +122,6 @@ std::vector<cv::Rect> YoloClient::postProcess(std::vector<std::vector<float>> bb
     /* This functoin scales the bboxes to the original frame size and converts (x1, y1, x2, y2) to (x, y, w, h) */
 
     auto start_time = std::chrono::high_resolution_clock::now();
-
-    std::cout << padW << " " << padH << std::endl;
-    std::cout << scaleW << " " << scaleH << std::endl;
 
     std::vector<float> padding = {static_cast<float>(padW), static_cast<float>(padH), static_cast<float>(padW), static_cast<float>(padH)};
     std::vector<float> scaling = {scaleW, scaleH, scaleW, scaleH};
@@ -176,7 +145,7 @@ std::vector<cv::Rect> YoloClient::postProcess(std::vector<std::vector<float>> bb
         rectangles.push_back(rectangle);
     }
 
-    std::cout << "postProcess: " << util::duration(start_time) << std::endl;
+    std::cout << "post process duration: " << util::duration(start_time) << std::endl;
 
     return rectangles;
 }
