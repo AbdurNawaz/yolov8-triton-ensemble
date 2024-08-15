@@ -18,7 +18,7 @@ int main()
 
     std::vector<cv::Rect> boxes = yolo_client.detect(image);
 
-    std::cout << "Inference time: " << duration(start_time) << std::endl;
+    std::cout << "Inference time: " << util::duration(start_time) << std::endl;
 
     for (cv::Rect &box : boxes)
     {
@@ -28,7 +28,7 @@ int main()
 
     cv::imwrite("output.jpeg", image);
 
-    std::cout << "Frame processing time: " << duration(start_time) << std::endl;
+    std::cout << "Frame processing time: " << util::duration(start_time) << std::endl;
 
     return 0;
 }
