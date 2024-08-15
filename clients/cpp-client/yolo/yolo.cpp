@@ -91,7 +91,7 @@ std::vector<cv::Rect> YoloClient::detect(cv::Mat &frame)
 
     std::vector<uint8_t> inputData;
     const auto [padH, padW, scaleH, scaleW] = this->preprocess(frame, inputData);
-    std::cout << "Split: " << duration(start_time) << std::endl;
+    std::cout << "Split: " << util::duration(start_time) << std::endl;
 
     tc::InferResult *result = this->triton_->infer(inputData);
 
@@ -140,7 +140,7 @@ std::tuple<std::vector<std::vector<float>>, std::vector<float>> YoloClient::pars
     std::vector<float> detectionScores;
     Triton::parseFloatArrayFromResult(tritonResult, "detection_scores", detectionScores);
 
-    std::cout << "parseTritonOutput: " << duration(start_time) << std::endl;
+    std::cout << "parseTritonOutput: " << util::duration(start_time) << std::endl;
 
     return std::make_tuple(bboxes, detectionScores);
 }
@@ -176,7 +176,7 @@ std::vector<cv::Rect> YoloClient::postProcess(std::vector<std::vector<float>> bb
         rectangles.push_back(rectangle);
     }
 
-    std::cout << "postProcess: " << duration(start_time) << std::endl;
+    std::cout << "postProcess: " << util::duration(start_time) << std::endl;
 
     return rectangles;
 }
